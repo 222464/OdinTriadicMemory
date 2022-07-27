@@ -26,7 +26,11 @@ triadic_memory_free :: proc(tm: Triadic_Memory) {
 triadic_memory_add :: proc(tm: Triadic_Memory, x: SDR, y: SDR, z: SDR) {
     for i := 0; i < x.p; i += 1 {
         for j := 0; j < y.p; j += 1 {
-            for k := 0; k < z.p; k += 1 do tm.mem[z.indices[k] + tm.n * (y.indices[j] + tm.n * x.indices[i])] += 1
+            for k := 0; k < z.p; k += 1 {
+                index := z.indices[k] + tm.n * (y.indices[j] + tm.n * x.indices[i])
+
+                tm.mem[index] = min(255, tm.mem[index] + 1)
+            }
         }
     }
 }

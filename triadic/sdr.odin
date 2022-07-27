@@ -35,7 +35,7 @@ sdr_randomize :: proc(sdr: SDR, randomize_buffer: []int, rng: ^rand.Rand) {
 
     assert(len(randomize_buffer) == n)
 
-    for i := 0; i < sdr.p; i += 1 {
+    for i in 0..<sdr.p {
         r := int(rand.uint32(rng) % u32(n))
 
         sdr.indices[i] = randomize_buffer[r]
@@ -60,7 +60,7 @@ sdr_copy :: proc(dst: ^SDR, src: SDR) {
 
     dst.p = src.p
 
-    for i := 0; i < dst.p; i += 1 do dst.indices[i] = src.indices[i]
+    for i in 0..<dst.p do dst.indices[i] = src.indices[i]
 }
 
 sdr_or :: proc(dst: ^SDR, left: SDR, right: SDR) {
@@ -111,7 +111,7 @@ sdr_equal :: proc(left: SDR, right: SDR) -> bool {
 
     if left.p != right.p do return false 
 
-    for i := 0; i < left.p; i += 1 {
+    for i in 0..<left.p {
         if left.indices[i] != right.indices[i] do return false
     }
 
@@ -163,7 +163,7 @@ sdr_overlap :: proc(left: SDR, right: SDR) -> int {
 sdr_print :: proc(sdr: SDR) {
     fmt.print("{")
 
-    for i := 0; i < sdr.p; i += 1 {
+    for i in 0..<sdr.p {
         fmt.print(sdr.indices[i]);
 
         if i < sdr.p - 1 do fmt.print(" ")
@@ -188,7 +188,7 @@ sdr_inhibit :: proc(dst: ^SDR, sums: []int, p: int) {
 
         index: int = 0
 
-        for i := 0; i < len(dst.indices); i += 1 {
+        for i in 0..<len(dst.indices) {
             if sums[i] >= threshold {
                 dst.indices[index] = i
                 index += 1

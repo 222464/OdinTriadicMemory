@@ -35,7 +35,7 @@ main :: proc() {
 
     fmt.println("Training...")
 
-    num_iterations: int = 10
+    num_iterations: int = 5
 
     for it := 0; it < num_iterations; it += 1 {
         fmt.printf("Iteration %d/%d\n", it, num_iterations)

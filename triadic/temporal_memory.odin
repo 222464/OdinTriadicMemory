@@ -9,10 +9,6 @@ Temporal_Memory :: struct {
     x, z, h, c, pred: SDR, // Left to right: Reconstructed input, reconstructed hidden state, hidden state, context (last hidden), prediction
 
     randomize_buffer: []int,
-
-    // Hyperparameters
-    x_tolerance: int, // Input update tolerance
-    c_tolerance: int, // Context update tolerance
 }
 
 temporal_memory_new :: proc(n: int, p: int) -> ^Temporal_Memory {
@@ -29,10 +25,6 @@ temporal_memory_new :: proc(n: int, p: int) -> ^Temporal_Memory {
     pred = sdr_new(n, p)
     randomize_buffer = make([]int, n)
     randomize_buffer_init(ttm.randomize_buffer)
-
-    // Hyperparameter defaults
-    x_tolerance = 1
-    c_tolerance = 1
 
     return ttm
 }
@@ -62,7 +54,7 @@ temporal_memory_flush :: proc(ttm: ^Temporal_Memory) {
 temporal_memory_step :: proc(ttm: ^Temporal_Memory, input: SDR, rng: ^rand.Rand, learn_enabled: bool = true) -> SDR {
     using ttm
 
-    if learn_enabled && !sdr_equal(pred, input) do triadic_memory_add(m2, input, h, c)
+    if learn_enabled do triadic_memory_add(m2, input, h, c)
 
     sdr_copy(&c, h)
 
@@ -73,7 +65,7 @@ temporal_memory_step :: proc(ttm: ^Temporal_Memory, input: SDR, rng: ^rand.Rand,
         triadic_memory_read_z(m1, input, h, &z) // Recall hidden state
 
         // Compare recall to actual (for both input and hidden)
-        if sdr_distance(x, input) > x_tolerance || sdr_distance(z, c) > c_tolerance {
+        if !sdr_equal(x, input) || !sdr_equal(z, c) {
             h.p = m1.p
 
             sdr_randomize(h, randomize_buffer, rng)

@@ -31,7 +31,7 @@ randomize_buffer_init :: proc(buffer: []int) {
 }
 
 sdr_randomize :: proc(sdr: SDR, randomize_buffer: []int, rng: ^rand.Rand) {
-    n: int = len(sdr.indices)
+    n := len(sdr.indices)
 
     assert(len(randomize_buffer) == n)
 
@@ -69,8 +69,8 @@ sdr_or :: proc(dst: ^SDR, left: SDR, right: SDR) {
     // Zip together left and right SDRs into dst
     dst.p = 0
 
-    l: int = 0
-    r: int = 0
+    l := 0
+    r := 0
 
     for l < left.p || r < right.p {
         if l == left.p {
@@ -121,10 +121,10 @@ sdr_equal :: proc(left: SDR, right: SDR) -> bool {
 sdr_distance :: proc(left: SDR, right: SDR) -> int {
     assert(len(left.indices) == len(right.indices))
 
-    l: int = 0
-    r: int = 0
+    l := 0
+    r := 0
 
-    dist: int = left.p + right.p
+    dist := left.p + right.p
 
     for l < left.p && r < right.p {
         if left.indices[l] == right.indices[l] {
@@ -142,10 +142,10 @@ sdr_distance :: proc(left: SDR, right: SDR) -> int {
 sdr_overlap :: proc(left: SDR, right: SDR) -> int {
     assert(len(left.indices) == len(right.indices))
 
-    l: int = 0
-    r: int = 0
+    l := 0
+    r := 0
 
-    overlap: int = 0
+    overlap := 0
 
     for l < left.p && r < right.p {
         if left.indices[l] == right.indices[l] {
@@ -186,7 +186,7 @@ sdr_inhibit :: proc(dst: ^SDR, sums: []int, p: int) {
     else {
         dst.p = p
 
-        index: int = 0
+        index := 0
 
         for i in 0..<len(dst.indices) {
             if sums[i] >= threshold {

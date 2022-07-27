@@ -49,7 +49,7 @@ triadic_memory_remove :: proc(tm: Triadic_Memory, x: SDR, y: SDR, z: SDR) {
 
 triadic_memory_read_x :: proc(tm: Triadic_Memory, x: ^SDR, y: SDR, z: SDR) {
     for i in 0..<tm.n {
-        sum: int = 0
+        sum := 0
 
         for j in 0..<y.p {
             for k in 0..<z.p do sum += int(tm.mem[z.indices[k] + tm.n * (y.indices[j] + tm.n * i)])
@@ -63,7 +63,7 @@ triadic_memory_read_x :: proc(tm: Triadic_Memory, x: ^SDR, y: SDR, z: SDR) {
 
 triadic_memory_read_y :: proc(tm: Triadic_Memory, x: SDR, y: ^SDR, z: SDR) {
     for j in 0..<tm.n {
-        sum: int = 0
+        sum := 0
 
         for i in 0..<x.p {
             for k in 0..<z.p do sum += int(tm.mem[z.indices[k] + tm.n * (j + tm.n * x.indices[i])])
@@ -77,7 +77,7 @@ triadic_memory_read_y :: proc(tm: Triadic_Memory, x: SDR, y: ^SDR, z: SDR) {
 
 triadic_memory_read_z :: proc(tm: Triadic_Memory, x: SDR, y: SDR, z: ^SDR) {
     for k in 0..<tm.n {
-        sum: int = 0
+        sum := 0
 
         for i in 0..<x.p {
             for j in 0..<y.p do sum += int(tm.mem[k + tm.n * (y.indices[j] + tm.n * x.indices[i])])

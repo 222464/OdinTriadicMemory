@@ -9,7 +9,7 @@ import "core:strings"
 import tri "triadic"
 
 main :: proc() {
-    n: int = 512
+    n: int = 1024
     p: int = 8
 
     rng: rand.Rand = rand.create(u64(intrinsics.read_cycle_counter()))
@@ -35,7 +35,7 @@ main :: proc() {
 
     fmt.println("Training...")
 
-    num_iterations: int = 5
+    num_iterations: int = 10
 
     for it := 0; it < num_iterations; it += 1 {
         fmt.printf("Iteration %d/%d\n", it, num_iterations)

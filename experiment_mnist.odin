@@ -96,12 +96,12 @@ when EXPERIMENT == "mnist" {
 
         fmt.println("Training...")
 
-        num_iterations: int = 100
+        num_iterations: int = 10000
 
         for it in 0..<num_iterations {
             if it % 100 == 99 do fmt.printf("Iteration %d/%d\n", it, num_iterations)
             
-            rand_index := int(rand.uint32(&rng) % 10)
+            rand_index := int(rand.uint32(&rng) % MNIST_NUM_ITEMS)
 
             label := dataset.labels[rand_index]
             img := mnist_get_image(dataset, rand_index)
@@ -116,11 +116,11 @@ when EXPERIMENT == "mnist" {
         pred := tri.sdr_new(ny, p)
         defer tri.sdr_free(pred)
 
-        num_test: int = 100
+        num_test: int = 1000
         test_errors: int = 0
 
         for t in 0..<num_test {
-            rand_index := int(rand.uint32(&rng) % 10)
+            rand_index := int(rand.uint32(&rng) % MNIST_NUM_ITEMS)
 
             label := dataset.labels[rand_index]
             img := mnist_get_image(dataset, rand_index)

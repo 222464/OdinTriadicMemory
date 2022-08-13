@@ -71,8 +71,8 @@ when EXPERIMENT == "mnist" {
         defer mnist_free(dataset)
 
         nx: int = 512
-        ny: int = 256
-        p: int = 4
+        ny: int = 512
+        p: int = 8
 
         rng: rand.Rand = rand.create(u64(intrinsics.read_cycle_counter()))
 
@@ -96,6 +96,9 @@ when EXPERIMENT == "mnist" {
 
         fmt.println("Training...")
 
+        pred := tri.sdr_new(ny, p)
+        defer tri.sdr_free(pred)
+
         num_iterations: int = 10000
 
         for it in 0..<num_iterations {
@@ -108,13 +111,25 @@ when EXPERIMENT == "mnist" {
 
             tri.image_encoder_step(ie, img, true)
 
-            tri.diadic_memory_add(dm, ie.h, label_sdrs[label])
+            tri.diadic_memory_read_y(dm, ie.h, &pred)
+
+            // Search labels
+            min_dist: int = ny
+            min_index: u8 = 0
+
+            for v, i in label_sdrs {
+                dist := tri.sdr_distance(pred, v) 
+
+                if dist < min_dist {
+                    min_dist = dist
+                    min_index = u8(i)
+                }
+            }
+
+            if min_index != label do tri.diadic_memory_add(dm, ie.h, label_sdrs[label])
         }
 
         fmt.println("Recall:")
-
-        pred := tri.sdr_new(ny, p)
-        defer tri.sdr_free(pred)
 
         num_test: int = 1000
         test_errors: int = 0

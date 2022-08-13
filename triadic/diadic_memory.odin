@@ -1,4 +1,4 @@
-package diadic
+package triadic
 
 import "core:math"
 import "core:math/rand"
@@ -26,7 +26,7 @@ diadic_memory_free :: proc(dm: Diadic_Memory) {
 diadic_memory_add :: proc(dm: Diadic_Memory, x: SDR, y: SDR) {
     for i in 1..<x.p {
         for j in 0..<i {
-            start := y.n * (x.indices[j] + x.indices[i] * (x.indices[i] - 1) / 2)
+            start := dm.ny * (x.indices[j] + x.indices[i] * (x.indices[i] - 1) / 2)
 
             for k in 0..<y.p {
                 index := y.indices[k] + start
@@ -40,7 +40,7 @@ diadic_memory_add :: proc(dm: Diadic_Memory, x: SDR, y: SDR) {
 diadic_memory_remove :: proc(dm: Diadic_Memory, x: SDR, y: SDR) {
     for i in 1..<x.p {
         for j in 0..<i {
-            start := y.n * (x.indices[j] + x.indices[i] * (x.indices[i] - 1) / 2)
+            start := dm.ny * (x.indices[j] + x.indices[i] * (x.indices[i] - 1) / 2)
 
             for k in 0..<y.p {
                 index := y.indices[k] + start
@@ -56,15 +56,15 @@ diadic_memory_read_y :: proc(dm: Diadic_Memory, x: SDR, y: ^SDR) {
 
     for i in 1..<x.p {
         for j in 0..<i {
-            start := y.n * (x.indices[j] + x.indices[i] * (x.indices[i] - 1) / 2)
+            start := dm.ny * (x.indices[j] + x.indices[i] * (x.indices[i] - 1) / 2)
 
-            for k in 0..<y.n {
-                index := y.indices[k] + start
+            for k in 0..<dm.ny {
+                index := k + start
 
-                dm.sums[k] += dm.mem[index]
+                dm.sums[k] += int(dm.mem[index])
             }
         }
     }
 
-    sdr_inhibit(x, dm.sums, dm.p)
+    sdr_inhibit(y, dm.sums, dm.p)
 }

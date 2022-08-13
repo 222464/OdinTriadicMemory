@@ -28,7 +28,7 @@ image_encoder_new :: proc(m: int, n: int, p: int, rng: ^rand.Rand) -> ^Image_Enc
 
     weights = make([]u8, n * m)
 
-    for i in 0..<n do weights[i] = 0xff - u8(rand.uint32(rng) % u32(3))
+    for i in 0..<len(weights) do weights[i] = 0xff - u8(rand.uint32(rng) % u32(3))
 
     sums = make([]int, n)
 
@@ -53,22 +53,24 @@ image_encoder_free :: proc(ie: ^Image_Encoder) {
 image_encoder_step :: proc(ie: ^Image_Encoder, input: []u8, learn_enabled: bool = true) -> SDR {
     using ie
 
-    for i in 0..<h.n {
+    for i in 0..<len(h.indices) {
         sum := 0
 
-        for j in 0..<m do sum += weights[j + i * m] * input[j]
+        for j in 0..<m do sum += int(weights[j + i * m]) * int(input[j])
 
         sums[i] = sum
     }
 
-    sdr_inhibit(h, sums)
+    sdr_inhibit(&h, sums, h.p)
 
     // Learn
-    for i in 0..<h.p {
-        for j in 0..<m {
-            index := j + i * m
+    if learn_enabled {
+        for i in 0..<h.p {
+            for j in 0..<m {
+                index := j + i * m
 
-            weights[index] = max(0, int(weights[index]) + int(math.round(lr * min(0.0, f32(input[j]) - f32(weights[index])))))
+                weights[index] = u8(max(0, int(weights[index]) + int(math.round(lr * min(0.0, f32(input[j]) - f32(weights[index]))))))
+            }
         }
     }
 

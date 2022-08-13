@@ -1,4 +1,4 @@
 package main
 
-EXPERIMENT :: "chars"
-//EXPERIMENT :: "mnist"
+//EXPERIMENT :: "chars"
+EXPERIMENT :: "mnist"

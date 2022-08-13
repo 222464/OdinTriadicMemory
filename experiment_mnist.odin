@@ -70,62 +70,71 @@ when EXPERIMENT == "mnist" {
 
         defer mnist_free(dataset)
 
-        n: int = 1024
+        nx: int = 1024
+        ny: int = 1024
         p: int = 8
 
         rng: rand.Rand = rand.create(u64(intrinsics.read_cycle_counter()))
 
-        tm := tri.temporal_memory_new(n, p)
-        defer tri.triadic_memory_free(tm)
+        randomize_buffer := make([]int, ny)
+        randomize_buffer_init(randomize_buffer)
+        defer delete(randomize_buffer)
+
+        dm := tri.diadic_memory_new(nx, ny, p)
+        defer tri.diadic_memory_free(dm)
+
+        ie := tri.image_encoder_new(MNIST_IMAGE_SIZE, nx, p, &rng)
+        defer tri.image_encoder_free(ie)
 
         label_sdrs: [10]tri.SDR
 
-        for t in 0..<len(label_sdrs) do char_sdrs[t] = tri.sdr_new_random(n, p, ttm.randomize_buffer, &rng)
+        for t in 0..<len(label_sdrs) do char_sdrs[t] = tri.sdr_new_random(ny, p, randomize_buffer, &rng)
 
         defer for t in 0..<len(label_sdrs) {
             tri.sdr_free(label_sdrs[t])
         }
 
-        // Read the data
-        data, ok := os.read_entire_file_from_filename("corpus.txt")
-
-        if !ok {
-            fmt.println("Could not open file!")
-            return
-        }
-
         fmt.println("Training...")
 
-        num_iterations: int = 10
+        num_iterations: int = 1000
 
-        for it := 0; it < num_iterations; it += 1 {
-            fmt.printf("Iteration %d/%d\n", it, num_iterations)
+        for it in 0..<num_iterations {
+            if it % 100 == 99 do fmt.printf("Iteration %d/%d\n", it, num_iterations)
+            
+            rand_index := int(rand.uint32(&rng) % MNIST_NUM_ITEMS)
 
-            //tri.temporal_memory_flush(ttm)
+            label = dataset.labels[rand_index]
+            img := mnist_get_image(dataset, rand_index)
 
-            for t := 0; t < len(data); t += 1 {
-                c := int(data[t])
+            tri.image_encoder_step(ie, img, true)
 
-                tri.temporal_memory_step(ttm, char_sdrs[c], &rng, true)
-
-                if t % 100 == 99 {
-                    fmt.println(t)
-                }
-            }
+            tri.diadic_memory_add(dm, ie.h, label_sdrs[label])
         }
 
         fmt.println("Recall:")
 
-        //input := tri.sdr_new(n, p)
-        //defer tri.sdr_free(input)
+        pred := tri.sdr_new(ny, p)
+        defer tri.sdr_free(pred)
 
-        for t := 0; t < 1000; t += 1 {
-            // Search characters
-            min_dist: int = n
+        num_test: int = 1000
+        test_errors: int = 0
+
+        for t in 0..<num_test {
+            rand_index := int(rand.uint32(&rng) % MNIST_NUM_ITEMS)
+
+            label = dataset.labels[rand_index]
+            img := mnist_get_image(dataset, rand_index)
+
+            tri.image_encoder_step(ie, img, false)
+
+            tri.diadic_memory_read_y(dm, tri.h, pred)
+
+            // Search labels
+            min_dist: int = ny
             min_index: int = 0
 
-            for v, i in char_sdrs {
-                dist := tri.sdr_distance(ttm.pred, v) 
+            for v, i in label_sdrs {
+                dist := tri.sdr_distance(pred, v) 
 
                 if dist < min_dist {
                     min_dist = dist
@@ -133,9 +142,10 @@ when EXPERIMENT == "mnist" {
                 }
             }
 
-            fmt.print(rune(min_index))
-
-            tri.temporal_memory_step(ttm, char_sdrs[min_index], &rng, false)
+            if min_index != label do test_errors += 1
         }
+
+
+        fmt.printf("Errors: %d/%d Accuracy: %f\n", test_errors, num_test, 1.0 - f32(test_errors) / f32(num_test))
     }
 }
